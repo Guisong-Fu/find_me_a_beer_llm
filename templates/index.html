@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Find the Perfect Beer</title>
+</head>
+<body>
+    <form method="POST">
+        <textarea name="user_text"></textarea>
+        <button type="submit">Find me the perfect beer</button>
+    </form>
+
+    {% if beer %}
+    <h2>Beer Name: {{ beer.name }}</h2>
+    <h2>Beer Title: {{ beer.title }}</h2>
+
+    <h2>Beer First Brewed: {{ beer.first_brewed }}</h2>
+    <h2>Beer ABV: {{ beer.abv }}</h2>
+    <h2>Beer IBU: {{ beer.ibu }}</h2>
+    <h2>Beer EBV: {{ beer.ebc }}</h2>
+    <h2>Beer Food Pairing: {{ beer.food_pairing }}</h2>
+    <h2>Recommendation: {{ beer.recommendation_text }}</h2>
+    <img src="{{ beer.image_url }}" alt="Beer image">
+    {% endif %}
+</body>
+</html>
