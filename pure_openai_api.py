@@ -207,7 +207,7 @@ def find_beer(beer_request_text):
 if __name__ == '__main__':
 
     beer_request_text = f"""
-    Find me a dark beer with avb greater than 10 to pair with dumplings  
+    ENTER YOUR OWN BEER REQUEST  
     """
 
     print(find_beer(beer_request_text))
