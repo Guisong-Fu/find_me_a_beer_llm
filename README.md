@@ -1,40 +1,39 @@
-# Find a beer using GPT-4 LLM
+# Find a Beer Using GPT-4 Language Model
 
 ## Introduction
-This project can infer user request on beer. For example, a request can be explict `Find me a beer with ABV greater than 6.0 and brewed year after 2020 June to pair with spicy food`; or it can also be vague, for example `Find me a strong dark beer to pair with steak`.
+This project can interpret a user's request for a beer. For example, a request can be explicit, such as `Find me a beer with an ABV greater than 6.0, brewed after June 2020, and suitable for pairing with spicy food`. Alternatively, it can be vague, such as `Find me a strong, dark beer to pair with a steak`.
 
-It basically comes with 4 steps:
-1. Infer user request using GPT4. In the prompt for this step, it can handle explicit request, vague request and spelling errors. The output from this step is a list of parameters in JSOn format which will be used in the next step.
-2. Make Punk API calls using the parameters generated from the first step, fetch a list of beer options that meet the requirements.
-3. Make another GPT4 API call, and let GPT4 choose one beer that caters to the request most.
+The processing of the user request involves 3 steps:
+1. Use GPT-4 to infer the user's request. In this step, the model can handle explicit requests, vague requests, and spelling errors. The output is a JSON-formatted list of parameters to be used in the next step.
+2. Use the parameters from the first step to make API calls to Punk API. This retrieves a list of beer options that meet the user's requirements.
+3. Make another call to the GPT-4 API, allowing the model to select the beer that best suits the user's request.
 
+## How to Run the Program:
+1. Ensure you have the `openai` library installed.
+2. Rename `.env_example` to `.env`, and replace the placeholder with your own OpenAI API key.
+3. Open `pure_openai_api.py` and locate the `main` function at the bottom. Enter your beer request, then run :)
+4. (Work in Progress) A webpage has also been built using Flask to visualize the results:
+	- Ensure you have the `flask` library installed.
+	- Run `web.py` and navigate to `http://127.0.0.1:5000` in your browser.
+	- Enter your request in the provided field.
+	- Click the `Find me the perfect beer` button.
+	- Wait for the result to be displayed. Please be patient as it might take several seconds for all API calls to complete.
 
-## How to run:
-1. Make sure you have `openai` library installed.
-2. Rename `.env_example` to `.env` , and replace with your own openai API key.
-3. Open `pure_openai_api.py` and locate `main` function in the bottom, enter your own beer request.
-4. (WIP): I also built a webpage using Flask to visualize it.
-	a. make sure you have `flask`  installed.
-	b. run `web.py` and open `http://127.0.0.1:5000` from your browser.
-	c. Enter your request
-	d. click `Find me the perfect beer` button
-	e. Wait for result to be displayed. Please be patient in this step, it might take several second before all API calls finsish.
+## Implementation Explanation:
+1. How does the model handle ambiguous user inputs or spelling mistakes?
+- Instructions are included in the prompt using the few-shot learning technique. For example, it provides explicit examples of how vague requests should be handled, and how spelling errors should be fixed.
 
-## Implementation Explaination:
-1. What if the user input is ambiguous or contains spelling mistakes?
-- I included instructions in the prompt using `few-shot` techniques, meaning I explictly provided some examples how vague request should be handled, and how typo erros should be fixed.
-2. What if the Punk API does not return any results for the given input?
-There can be many reasons why Punk API does not return any result for the given input.
-	a. It can be the given input is incorrect. Thus we need to enhance and make sure the the input is indeed having the attributes that are accpetable by Punk API.
-	B. The user request cannot be inferred well. For example, `Find me a nice beer`. 
-	c. It can be the request is too narrow. For example, a request can be "Find a light beer to pair with steak". After the first inference, the parameters should be something like, `{"abv_lt": 4, "food":"steak"}`. But in Punk API or database, it may happen that no light beer is a good pair with steak, so the result will be empty. To address this, I set up a priority order(which is my preference when selecting beers), if the result is empty, then start exclude parameters one by one, and make new Punk API calls. In this case, the second API will be only looking for `{"abv_lt": 4}`.
-	d. If in the end, the result is still empty, then randomly pick 5 beers and let LLM to choose the best in the next step.
+2. What happens if the Punk API does not return any results for a given input?
+- There are several reasons why the Punk API might not return any results for a given input:
+	1. The parameters used in Punk API might be incorrect. Thus, we need to ensure that the input contains acceptable attributes for the Punk API, meaning we need to make the output from the first GPT4 is always in the format we want. 
+	2. The user request might not be sufficiently clear. For example, `Find me a nice beer`, which no attributes can be used to represent such request.  
+	3. The request might be too specific. For example, a request like `Find me a light beer to pair with a steak`. After the first inference, the parameters should be something like, `{"abv_lt": 4, "food":"steak"}`. But it may be that no light beer pairs well with steak in the Punk API or database, hence the result would be empty. To address this, a priority order is set up, and if the result is empty, parameters are excluded one by one, triggering new API calls. In this case, the second API call will be only looking for `{"abv_lt": 4}`.
+	4. If no results are found after all these steps, the model will randomly pick 5 beers and let the language model choose the best in the next step, which ensures we will return something at least.
 
-
-## What can be further improved?
-1. Punk API offers `fuzzy search`, but I guess what it really does is just by doing some `regex search`. For example, in Punk API, if you look for `food: meat`, it will only return `meatball` instead of other meat food. This will result in inperfect recommendation for food pairing. I was thinking about a few options, for example, maybe we can ignore `food` in the first step, and let LLM get all beers and let LLM decide the best food pairing. But I guess that will add more cost, so I didn't do it.
-2. Punk API is using different measure system I guess? For example, the EBC range from Punk is from 8 to 600, but the actual EBC range I found on line is something from 2 to 27. This makes LLM cannot decide what EBC value can represent "dark".
-3. In terms of vague request, we can provide more examples to LLM. For example, what is considered as "light beer", what is considered as "strong beer".
-4. In this example, I'm only using pure openai api. I think, if I use some frameworks, for example `langchain`. I may achive better result and cleaner code. For example, I may use agent to look for more information from the internet about "what is considerred as light or strong beer" and then future make the parametermore precise.
-5. OpenAI just released their function calling, it seems useful, but I haven't tried it myself.
-
+## Areas for Further Improvement:
+1. Even though Punk API offers fuzzy search, but it seems to only carry out regex search. For instance, if you search for `food: meat` in the Punk API, it will only return `meatball` instead of other types of meat dishes. This could result in imperfect recommendations for food pairing. Various options can be explored to address this. For example, we can completely ignore food pairing in the first step, and let LLM read all beers and then further choose the beer that matches food pairing requirement.
+2. It seems the Punk API uses a different measuring system. For instance, the EBC range provided by Punk API is from 8 to 600, while the actual EBC range found online is from 2 to 79. This discrepancy makes it difficult for the language model to determine what EBC value represents "dark".
+3. More examples can be provided to the language model regarding vague requests. For instance, what is considered a "light beer", or a "strong beer".
+4. In this project, I only use the pure OpenAI API. However, I believe that better results and cleaner code could be achieved with certain frameworks, such as Langchain. For instance, an agent could be used to gather more information from the internet about what is considered a light or strong beer, which could help make the parameters more precise.
+5. OpenAI has recently released their function calling capabilities, which seem useful, but I haven't tried it myself yet.
+6. Prompt can be further improved to reduce cost. 
