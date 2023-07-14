@@ -12,7 +12,7 @@ The processing of the user request involves 3 steps:
 1. Ensure you have the `openai` library installed.
 2. Rename `.env_example` to `.env`, and replace the placeholder with your own OpenAI API key.
 3. Open `pure_openai_api.py` and locate the `main` function at the bottom. Enter your beer request, then run :)
-4. (Work in Progress) A webpage has also been built using Flask to visualize the results:
+4. A webpage has also been built using Flask to visualize the results:
 	- Ensure you have the `flask` library installed.
 	- Run `web.py` and navigate to `http://127.0.0.1:5000` in your browser.
 	- Enter your request in the provided field.
